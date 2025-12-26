@@ -1,0 +1,99 @@
+/* ========================================== */
+/* 🎨 Global Styles & Material 3 Tokens (CSS) */
+/* ========================================== */
+
+:root {
+    --md-sys-color-primary: #00629e;
+    --md-sys-color-on-primary: #ffffff;
+    --md-sys-color-primary-container: #d0e4ff;
+    --md-sys-color-surface: #fdfcff;
+    --md-sys-color-surface-variant: #e1e2ec;
+    
+    /* Traffic Light System */
+    --color-error: #ba1a1a;        /* Red */
+    --color-error-container: #ffdad6;
+    --color-warning: #8c5000;      /* Yellow/Orange */
+    --color-warning-container: #ffdcbe;
+    --color-safe: #006d35;         /* Green */
+    --color-safe-container: #9ef6b2;
+    --radius-m: 12px;
+    --radius-l: 16px;
+    --shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--md-sys-color-surface);
+    color: #191c20;
+    padding-bottom: 80px; /* Space for FAB */
+}
+/* Utils */
+.flex-col { display: flex; flex-direction: column; gap: 1rem; }
+.flex-row { display: flex; flex-direction: row; align-items: center; gap: 0.5rem; }
+.card {
+    background: white;
+    border-radius: var(--radius-m);
+    padding: 1rem;
+    box-shadow: var(--shadow-1);
+    transition: transform 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+/* Status Styles */
+.status-error { background-color: var(--color-error-container); color: #410002; border-left: 6px solid var(--color-error); }
+.status-warning { background-color: var(--color-warning-container); color: #2d1600; border-left: 6px solid var(--color-warning); }
+.status-safe { background-color: var(--md-sys-color-surface); border: 1px solid var(--md-sys-color-surface-variant); border-left: 6px solid var(--color-safe); }
+/* Inputs */
+input[type="text"], input[type="date"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--md-sys-color-surface-variant);
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+/* Chip */
+.chip {
+    padding: 6px 16px;
+    background-color: var(--md-sys-color-surface-variant);
+    border-radius: 100px;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+}
+.chip:active { opacity: 0.7; }
+/* FAB */
+.fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    background-color: var(--md-sys-color-primary);
+    color: white;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+}
+/* Buttons */
+.btn-primary {
+    background-color: var(--md-sys-color-primary);
+    color: white;
+    width: 100%;
+    padding: 14px;
+    border-radius: 100px;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+/* Header */
+header { padding: 16px; }
+h1 { margin: 0; font-size: 24px; }
+.subtitle { color: #44474f; font-size: 14px; }
