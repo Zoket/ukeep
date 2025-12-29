@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 背景 -->
+  <rect width="512" height="512" fill="#00629e" rx="80"/>
+
+  <!-- 冰箱图标 -->
+  <g transform="translate(256, 256)">
+    <!-- 冰箱主体 -->
+    <rect x="-100" y="-140" width="200" height="280" fill="#ffffff" rx="15"/>
+
+    <!-- 冰箱门分隔线 -->
+    <line x1="-100" y1="-30" x2="100" y2="-30" stroke="#00629e" stroke-width="4"/>
+
+    <!-- 上门把手 -->
+    <rect x="70" y="-100" width="8" height="50" fill="#00629e" rx="4"/>
+
+    <!-- 下门把手 -->
+    <rect x="70" y="10" width="8" height="80" fill="#00629e" rx="4"/>
+
+    <!-- 装饰性冷冻标志 -->
+    <text x="0" y="-70" font-size="60" text-anchor="middle" fill="#00629e">❄️</text>
+  </g>
+</svg>

@@ -98,7 +98,7 @@ pub fn ItemCard(
                         "position: absolute; left: 0; top: 0; bottom: 0; width: 100px; display: flex; align-items: center; justify-content: flex-start; padding-left: 16px; color: var(--color-safe); opacity: {reveal}; pointer-events: none; background: linear-gradient(90deg, rgba(72,199,116,0.2), transparent);"
                     ),
                     span { class: "material-symbols-outlined", style: "font-size: 1.5rem;", "restaurant" }
-                    span { style: "margin-left: 8px; font-weight: 600; font-size: 0.9rem;", "吃掉" }
+                    span { style: "margin-left: 8px; font-weight: 600; font-size: 0.9rem;", "吃掉了" }
                 }
             }
 
@@ -108,7 +108,7 @@ pub fn ItemCard(
                     style: format!(
                         "position: absolute; right: 0; top: 0; bottom: 0; width: 100px; display: flex; align-items: center; justify-content: flex-end; padding-right: 16px; color: var(--color-error); opacity: {reveal}; pointer-events: none; background: linear-gradient(270deg, rgba(244,67,54,0.2), transparent);"
                     ),
-                    span { style: "margin-right: 8px; font-weight: 600; font-size: 0.9rem;", "扔掉" }
+                    span { style: "margin-right: 8px; font-weight: 600; font-size: 0.9rem;", "扔掉了" }
                     span { class: "material-symbols-outlined", style: "font-size: 1.5rem;", "delete" }
                 }
             }
@@ -145,13 +145,13 @@ pub fn ItemCard(
                 onclick: move |_| on_consume.call(item_id),
                 style: "position: absolute; left: -9999px;",
                 "aria-label": "吃掉了 (Consumed)",
-                "吃掉"
+                "吃掉了"
             }
             button {
                 onclick: move |_| on_waste.call(item_id),
                 style: "position: absolute; left: -9999px;",
                 "aria-label": "扔掉了 (Wasted)",
-                "扔掉"
+                "扔掉了"
             }
         }
     }

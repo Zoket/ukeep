@@ -8,7 +8,7 @@
     --md-sys-color-primary-container: #d0e4ff;
     --md-sys-color-surface: #fdfcff;
     --md-sys-color-surface-variant: #e1e2ec;
-    
+
     /* Traffic Light System */
     --color-error: #ba1a1a;        /* Red */
     --color-error-container: #ffdad6;
@@ -97,3 +97,7 @@ input[type="text"], input[type="date"] {
 header { padding: 16px; }
 h1 { margin: 0; font-size: 24px; }
 .subtitle { color: #44474f; font-size: 14px; }
+/* Menu Item Hover Effect */
+.menu-item:hover {
+    background: #f5f5f5 !important;
+}
