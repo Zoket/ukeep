@@ -48,15 +48,15 @@ impl Item {
         (self.expiry_date - today).num_days()
     }
 
-    /// 获取状态颜色类名 (CSS Class)
+    /// 获取状态颜色类名 (Tailwind CSS Class)
     pub fn status_class(&self) -> &'static str {
         let days = self.days_remaining();
         if days <= 1 {
-            "status-error" // 🔴 过期 或 剩1天
+            "bg-red-50 border-l-4 border-red-500 shadow-sm" // 🔴 过期 或 剩1天
         } else if days <= 3 {
-            "status-warning" // 🟡 3天内
+            "bg-amber-50 border-l-4 border-amber-500 shadow-sm" // 🟡 3天内
         } else {
-            "status-safe" // 🟢 安全
+            "bg-white border border-gray-100 border-l-4 border-l-green-500 shadow-sm" // 🟢 安全
         }
     }
 

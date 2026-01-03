@@ -74,79 +74,79 @@ pub fn AddItem() -> Element {
     };
 
     rsx! {
-        div { class: "flex-col", style: "padding: 24px; max-width: 600px; margin: 0 auto; min-height: 100vh; background: white;",
+        div { class: "flex flex-col p-6 max-w-2xl mx-auto min-h-screen bg-white",
 
             // Top Bar
-            div { class: "flex-row", style: "margin-bottom: 20px;",
-                Link { to: Route::Home {}, class: "material-symbols-outlined", style: "text-decoration: none; color: black;", "arrow_back" }
-                h2 { style: "flex: 1; text-align: center; margin: 0;", "录入新物品" }
-                div { style: "width: 24px;" } // spacer
+            div { class: "flex items-center mb-6",
+                Link { to: Route::Home {}, class: "material-symbols-outlined text-gray-600 p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors", "arrow_back" }
+                h2 { class: "flex-1 text-center text-lg font-semibold text-gray-900 pr-8", "录入新物品" } // pr-8 balances the back button width visually
             }
 
             // 1. Name Input
-            div { class: "flex-col",
-                label { "物品名称" }
-                div { class: "flex-row",
+            div { class: "flex flex-col mb-6",
+                label { class: "block text-sm font-medium text-gray-700 mb-2", "物品名称" }
+                div { class: "flex items-center gap-3",
                     input {
                         r#type: "text",
+                        class: "flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all",
                         value: "{name}",
                         oninput: move |evt| name.set(evt.value()),
                         placeholder: "例如：全麦面包"
                     }
-                    button { style: "background:none; border:none;", title: "扫码 (UI Only)",
+                    button {
+                        class: "p-3 bg-gray-100 rounded-xl text-gray-600 hover:bg-gray-200 transition-colors",
+                        title: "扫码 (UI Only)",
                         span { class: "material-symbols-outlined", "qr_code_scanner" }
                     }
                 }
             }
 
             // 2. Quick Chips
-            div { class: "flex-row", style: "flex-wrap: wrap; gap: 8px;",
+            div { class: "flex flex-wrap gap-2 mb-8",
                 for (n, d, e) in quick_options {
-                    span {
-                        class: "chip",
+                    button {
+                        class: "px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors cursor-pointer active:scale-95 border-none",
                         onclick: move |_| apply_chip(n, d, e),
                         "{n}"
                     }
                 }
             }
 
-            div { style: "height: 16px;" } // Spacer
-
             // 3. Production Date / Entry Date
-            div { class: "flex-col",
-                label { "生产日期 / 入库日期" }
+            div { class: "flex flex-col mb-6",
+                label { class: "block text-sm font-medium text-gray-700 mb-2", "生产日期 / 入库日期" }
                 input {
                     r#type: "date",
+                    class: "w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all",
                     value: "{production_date_str}",
                     oninput: move |evt| production_date_str.set(evt.value())
                 }
             }
 
-            div { style: "height: 16px;" } // Spacer
-
             // 4. Expiry Date
-            div { class: "flex-col",
-                label { "过期日期" }
+            div { class: "flex flex-col mb-8",
+                label { class: "block text-sm font-medium text-gray-700 mb-2", "过期日期" }
                 // Duration Presets
-                div { class: "flex-row", style: "justify-content: space-between;",
-                    button { class: "chip", onclick: move |_| add_days(3), "+3天" }
-                    button { class: "chip", onclick: move |_| add_days(7), "+7天" }
-                    button { class: "chip", onclick: move |_| add_days(15), "+15天" }
-                    button { class: "chip", onclick: move |_| add_days(30), "+30天" }
+                div { class: "flex flex-wrap gap-2 mb-3",
+                    button { class: "px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors border-none cursor-pointer", onclick: move |_| add_days(3), "+3天" }
+                    button { class: "px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors border-none cursor-pointer", onclick: move |_| add_days(7), "+7天" }
+                    button { class: "px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors border-none cursor-pointer", onclick: move |_| add_days(15), "+15天" }
+                    button { class: "px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors border-none cursor-pointer", onclick: move |_| add_days(30), "+30天" }
                 }
                 // Expiry Date Picker
                 input {
                     r#type: "date",
+                    class: "w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all",
                     value: "{expiry_date_str}",
                     oninput: move |evt| expiry_date_str.set(evt.value())
                 }
             }
 
-            div { style: "flex: 1;" } // Push button to bottom
+            div { class: "flex-1" } // Push button to bottom
 
             // 5. Submit
             button {
-                class: "btn-primary",
+                class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-95 text-lg mt-4",
                 onclick: submit,
                 "保 存"
             }

@@ -121,64 +121,57 @@ pub fn Home() -> Element {
     };
 
     rsx! {
-        div { class: "flex-col", style: "padding: 16px; max-width: 600px; margin: 0 auto;",
+        div { class: "flex flex-col p-4 max-w-2xl mx-auto min-h-screen",
             // --- Header ---
-            header {
-                // 使用 flex 布局，将设置按钮放在右上角
-                div { style: "display: flex; justify-content: space-between; align-items: flex-start;",
-                    div {
-                        h1 { "我的冰箱 🧊" }
-                        span { class: "subtitle",
-                            if urgent_count > 0 {
-                                "⚠️ 有 {urgent_count} 个物品需要尽快处理"
-                            } else {
-                                "👏 一切看起来都很新鲜"
-                            }
+            header { class: "flex justify-between items-start mb-6 pt-2",
+                div {
+                    h1 { class: "text-2xl font-bold text-gray-900", "我的冰箱 🧊" }
+                    span { class: "text-sm text-gray-500 mt-1 block",
+                        if urgent_count > 0 {
+                            "⚠️ 有 {urgent_count} 个物品需要尽快处理"
+                        } else {
+                            "👏 一切看起来都很新鲜"
                         }
                     }
+                }
 
-                    // 设置按钮和下拉菜单容器
-                    div { style: "position: relative;",
-                        // 设置按钮
-                        button {
-                            class: "material-symbols-outlined",
-                            style: "background: none; border: none; color: #999; cursor: pointer; padding: 8px; font-size: 24px;",
-                            onclick: move |_| show_settings.set(!show_settings()),
-                            "settings"
+                // 设置按钮和下拉菜单容器
+                div { class: "relative",
+                    // 设置按钮
+                    button {
+                        class: "material-symbols-outlined p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors",
+                        onclick: move |_| show_settings.set(!show_settings()),
+                        "settings"
+                    }
+
+                    // 下拉菜单
+                    if show_settings() {
+                        // 透明遮罩层（捕获外部点击）
+                        div {
+                            class: "fixed inset-0 z-10 cursor-default",
+                            onclick: move |_| show_settings.set(false),
                         }
 
-                        // 下拉菜单
-                        if show_settings() {
-                            // 透明遮罩层（捕获外部点击）
-                            div {
-                                style: "position: fixed; inset: 0; z-index: 10; cursor: default;",
-                                onclick: move |_| show_settings.set(false),
+                        // 菜单内容
+                        div {
+                            class: "absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-20 overflow-hidden",
+                            // 导出数据
+                            button {
+                                class: "w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-sm text-gray-700 transition-colors",
+                                onclick: handle_export,
+                                span { class: "material-symbols-outlined text-blue-500 text-xl", "download" }
+                                span { "导出数据" }
                             }
 
-                            // 菜单内容
-                            div {
-                                style: "position: absolute; right: 0; margin-top: 8px; width: 200px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 20; border: 1px solid #f0f0f0; overflow: hidden;",
+                            // 分隔线
+                            div { class: "h-px bg-gray-100" }
 
-                                // 导出数据
-                                button {
-                                    class: "menu-item",
-                                    style: "width: 100%; text-align: left; padding: 12px 16px; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;",
-                                    onclick: handle_export,
-                                    span { class: "material-symbols-outlined", style: "color: #2196F3; font-size: 20px;", "download" }
-                                    span { "导出数据" }
-                                }
-
-                                // 分隔线
-                                div { style: "height: 1px; background: #f5f5f5;" }
-
-                                // 导入数据
-                                button {
-                                    class: "menu-item",
-                                    style: "width: 100%; text-align: left; padding: 12px 16px; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px;",
-                                    onclick: handle_import,
-                                    span { class: "material-symbols-outlined", style: "color: #4CAF50; font-size: 20px;", "upload" }
-                                    span { "导入数据" }
-                                }
+                            // 导入数据
+                            button {
+                                class: "w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-sm text-gray-700 transition-colors",
+                                onclick: handle_import,
+                                span { class: "material-symbols-outlined text-green-500 text-xl", "upload" }
+                                span { "导入数据" }
                             }
                         }
                     }
@@ -188,10 +181,10 @@ pub fn Home() -> Element {
             // 错误提示
             if let Some(err) = error_message() {
                 div {
-                    style: "background: #ffebee; color: #c62828; padding: 12px; border-radius: 8px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;",
+                    class: "bg-red-50 text-red-700 p-4 rounded-xl mb-4 flex justify-between items-center shadow-sm",
                     span { "{err}" }
                     button {
-                        style: "background: none; border: none; color: #c62828; cursor: pointer; font-size: 18px;",
+                        class: "text-red-700 hover:text-red-900",
                         onclick: move |_| error_message.set(None),
                         "✕"
                     }
@@ -199,7 +192,7 @@ pub fn Home() -> Element {
             }
 
             // --- List View ---
-            div { class: "flex-col",
+            div { class: "flex flex-col pb-24",
                 for item in sorted_items {
                     ItemCard {
                         key: "{item.id()}",
@@ -212,8 +205,8 @@ pub fn Home() -> Element {
         }
 
         // --- FAB ---
-        Link { to: Route::AddItem {}, class: "fab",
-            span { class: "material-symbols-outlined", "add" }
+        Link { to: Route::AddItem {}, class: "fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-600/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-40",
+            span { class: "material-symbols-outlined text-3xl", "add" }
         }
     }
 }

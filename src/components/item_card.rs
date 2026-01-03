@@ -88,36 +88,32 @@ pub fn ItemCard(
 
     rsx! {
         div {
-            class: "card flex-row {item.status_class()}",
-            style: "position: relative; justify-content: space-between; overflow: hidden; touch-action: pan-y;",
-
+            class: "relative flex items-center justify-between overflow-hidden touch-pan-y rounded-xl mb-3 select-none {item.status_class()}",
             // 背景提示层 - 左侧（吃掉，右滑时显示）
             if drag > 0.0 {
                 div {
-                    style: format!(
-                        "position: absolute; left: 0; top: 0; bottom: 0; width: 100px; display: flex; align-items: center; justify-content: flex-start; padding-left: 16px; color: var(--color-safe); opacity: {reveal}; pointer-events: none; background: linear-gradient(90deg, rgba(72,199,116,0.2), transparent);"
-                    ),
-                    span { class: "material-symbols-outlined", style: "font-size: 1.5rem;", "restaurant" }
-                    span { style: "margin-left: 8px; font-weight: 600; font-size: 0.9rem;", "吃掉了" }
+                    class: "absolute left-0 top-0 bottom-0 w-24 flex items-center justify-start pl-4 text-green-600 bg-gradient-to-r from-green-100/50 to-transparent",
+                    style: "opacity: {reveal}; pointer-events: none;",
+                    span { class: "material-symbols-outlined text-2xl", "restaurant" }
+                    span { class: "ml-2 font-semibold text-sm", "吃掉了" }
                 }
             }
 
             // 背景提示层 - 右侧（扔掉，左滑时显示）
             if drag < 0.0 {
                 div {
-                    style: format!(
-                        "position: absolute; right: 0; top: 0; bottom: 0; width: 100px; display: flex; align-items: center; justify-content: flex-end; padding-right: 16px; color: var(--color-error); opacity: {reveal}; pointer-events: none; background: linear-gradient(270deg, rgba(244,67,54,0.2), transparent);"
-                    ),
-                    span { style: "margin-right: 8px; font-weight: 600; font-size: 0.9rem;", "扔掉了" }
-                    span { class: "material-symbols-outlined", style: "font-size: 1.5rem;", "delete" }
+                    class: "absolute right-0 top-0 bottom-0 w-24 flex items-center justify-end pr-4 text-red-600 bg-gradient-to-l from-red-100/50 to-transparent",
+                    style: "opacity: {reveal}; pointer-events: none;",
+                    span { class: "mr-2 font-semibold text-sm", "扔掉了" }
+                    span { class: "material-symbols-outlined text-2xl", "delete" }
                 }
             }
 
             // 可拖动的卡片内容
             div {
-                class: "flex-row",
+                class: "flex items-stretch w-full z-10 cursor-grab active:cursor-grabbing bg-transparent",
                 style: format!(
-                    "width: 100%; align-items: stretch; transform: translateX({drag}px); transition: {transition}; cursor: grab; position: relative; z-index: 1;"
+                    "transform: translateX({drag}px); transition: {transition};"
                 ),
                 onpointerdown: on_pointer_down,
                 onpointermove: on_pointer_move,
@@ -126,30 +122,30 @@ pub fn ItemCard(
                 onpointerleave: on_pointer_leave,
 
                 // 左侧信息
-                div { class: "flex-row", style: "flex: 1; padding: 12px;",
-                    span { style: "font-size: 2rem;", "{item.emoji()}" }
-                    div { class: "flex-col", style: "gap: 2px; margin-left: 12px;",
-                        span { style: "font-size: 1.1rem; font-weight: 500;", "{item.name()}" }
-                        span { style: "font-size: 0.8rem; opacity: 0.7;", "{item.expiry_date().format(\"%Y-%m-%d\")}" }
+                div { class: "flex-1 flex items-center p-4",
+                    span { class: "text-3xl mr-4", "{item.emoji()}" }
+                    div { class: "flex flex-col gap-0.5",
+                        span { class: "text-lg font-medium text-gray-900", "{item.name()}" }
+                        span { class: "text-xs text-gray-500", "{item.expiry_date().format(\"%Y-%m-%d\")}" }
                     }
                 }
 
                 // 右侧信息
-                div { class: "flex-col", style: "align-items: flex-end; justify-content: center; padding: 12px;",
-                    span { style: "font-size: 1.2rem; font-weight: bold;", "{item.display_deadline()}" }
+                div { class: "flex flex-col items-end justify-center p-4",
+                    span { class: "text-sm font-bold text-gray-700", "{item.display_deadline()}" }
                 }
             }
 
             // 可访问性：隐藏的按钮供键盘和屏幕阅读器使用
             button {
                 onclick: move |_| on_consume.call(item_id),
-                style: "position: absolute; left: -9999px;",
+                class: "sr-only",
                 "aria-label": "吃掉了 (Consumed)",
                 "吃掉了"
             }
             button {
                 onclick: move |_| on_waste.call(item_id),
-                style: "position: absolute; left: -9999px;",
+                class: "sr-only",
                 "aria-label": "扔掉了 (Wasted)",
                 "扔掉了"
             }

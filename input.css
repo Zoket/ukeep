@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@source "./src/**/*.{rs,html,css}";
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased font-sans pb-24;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

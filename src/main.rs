@@ -5,7 +5,7 @@ use ukeep::router::Route;
 use ukeep::state::InventoryState;
 use ukeep::storage::{load_inventory, save_inventory};
 
-static CSS: Asset = asset!("/assets/main.css");
+static CSS: Asset = asset!("/assets/tailwind.css");
 
 fn main() {
     dioxus::launch(App);
@@ -53,7 +53,7 @@ fn App() -> Element {
 
         // PWA 支持
         document::Link { rel: "manifest", href: "/assets/manifest.json" }
-        document::Meta { name: "theme-color", content: "#00629e" }
+        document::Meta { name: "theme-color", content: "#2563eb" }
         document::Meta { name: "apple-mobile-web-app-capable", content: "yes" }
         document::Meta { name: "apple-mobile-web-app-status-bar-style", content: "default" }
         document::Meta { name: "apple-mobile-web-app-title", content: "uKeep" }
