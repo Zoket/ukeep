@@ -32,3 +32,17 @@ To run for a different platform, use the `--platform platform` flag. E.g.
 dx serve --platform desktop
 ```
 
+## Docker 部署
+
+使用 Docker 快速部署到生产环境:
+
+```bash
+# 一键构建并运行
+./docker-deploy.sh
+
+# 或使用 Docker Compose
+docker-compose up -d
+```
+
+详细的 Docker 部署说明请查看 [DOCKER_DEPLOY.md](./DOCKER_DEPLOY.md)。
+

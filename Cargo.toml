@@ -33,7 +33,7 @@ mobile = ["dioxus/mobile"]
 opt-level = "z"          # 优化代码大小
 lto = true               # 启用链接时优化
 codegen-units = 1        # 更好的优化效果
-strip = true             # 去除调试符号
+strip = "debuginfo"      # 剥离调试信息，避免 wasm-opt DWARF 兼容性问题
 panic = "abort"          # panic 时直接终止
 
 [profile.wasm-dev]

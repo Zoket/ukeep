@@ -5,6 +5,10 @@
 # HTML title tag content
 title = "ukeep"
 
+# Disable wasm-opt to avoid DWARF compatibility issues
+[web.wasm_opt]
+level = "0"
+
 # include `assets` in web platform
 [web.resource]
 

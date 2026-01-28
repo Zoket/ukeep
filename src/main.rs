@@ -28,7 +28,6 @@ fn App() -> Element {
     use_effect(move || {
         #[cfg(target_arch = "wasm32")]
         {
-            use wasm_bindgen::JsCast;
             use wasm_bindgen_futures::JsFuture;
             use web_sys::window;
 

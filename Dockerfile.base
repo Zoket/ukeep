@@ -1,0 +1,42 @@
+# Base image for ukeep builds
+# Pre-installs all build tools to speed up subsequent builds
+FROM rust:1.92-slim
+
+WORKDIR /app
+
+# Install system dependencies including binaryen (contains wasm-opt)
+RUN apt-get update && \
+    apt-get install -y \
+        pkg-config \
+        libssl-dev \
+        wget \
+        build-essential \
+        cmake \
+        binaryen \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install wabt (WebAssembly Binary Toolkit)
+RUN wget -q https://github.com/WebAssembly/wabt/releases/download/1.0.36/wabt-1.0.36-ubuntu-20.04.tar.gz && \
+    tar -xzf wabt-1.0.36-ubuntu-20.04.tar.gz && \
+    cp wabt-1.0.36/bin/* /usr/local/bin/ && \
+    rm -rf wabt-1.0.36* && \
+    chmod +x /usr/local/bin/wasm-*
+
+# Add wasm target
+RUN rustup target add wasm32-unknown-unknown
+
+# Install dioxus-cli via cargo-binstall
+RUN cargo install cargo-binstall && \
+    cargo binstall dioxus-cli -y
+
+# Pre-install wasm-bindgen-cli to avoid runtime download
+RUN cargo install wasm-bindgen-cli@0.2.106
+
+# Verify installations
+RUN dx --version && \
+    wasm-opt --version && \
+    wasm-bindgen --version
+
+# Clean cargo cache to reduce image size (keep registry index)
+RUN rm -rf /usr/local/cargo/registry/cache/* \
+    /usr/local/cargo/registry/src/*
