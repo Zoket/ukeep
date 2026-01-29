@@ -23,3 +23,6 @@ target
 node_modules
 
 .DS_Store
+
+# Deploy config (contains sensitive VPS info)
+.env.deploy

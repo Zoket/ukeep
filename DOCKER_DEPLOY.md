@@ -4,15 +4,17 @@
 
 ## 文件说明
 
-- `Dockerfile`: 多阶段构建配置
-  - Stage 1: 使用 Node.js 编译 Tailwind CSS
-  - Stage 2: 使用 Rust 构建 WASM 应用(使用 `dx bundle` 进行生产优化)
-  - Stage 3: 使用 Nginx 提供静态文件服务
-  - 包含 binaryen 工具集(wasm-strip, wasm-opt)用于 WASM 优化
-
-- `docker-compose.yml`: Docker Compose 配置文件
-- `nginx.conf`: Nginx 服务器配置(支持 SPA 路由)
-- `.dockerignore`: Docker 构建时忽略的文件
+| 文件 | 说明 |
+|------|------|
+| `Dockerfile` | 多阶段构建 (Tailwind → Rust/WASM → Nginx) |
+| `Dockerfile.base` | 预构建基础镜像 (Rust + dioxus-cli + wasm 工具链) |
+| `docker-compose.yml` | Docker Compose 配置 |
+| `nginx.conf` | Nginx 配置 (SPA、WASM、PWA 支持) |
+| `.dockerignore` | Docker 构建忽略文件 |
+| `docker-deploy.sh` | 本地构建/运行脚本 |
+| `docker-push.sh` | 推送镜像到 VPS 脚本 |
+| `docker-cicd.sh` | 完整 CI/CD 流程脚本 |
+| `.github/workflows/deploy.yml` | GitHub Actions 自动部署 |
 
 ## 本地构建和测试
 
@@ -56,7 +58,72 @@ docker-compose up -d
 
 ## VPS 部署
 
-### 方法 1: 直接在 VPS 上构建
+### 方法 1: GitHub Actions 自动部署 (推荐)
+
+推送到 `main` 分支后自动构建并部署到 VPS。
+
+#### 配置步骤
+
+1. **配置 GitHub Secrets** (Settings → Secrets and variables → Actions):
+
+| Secret 名称 | 说明 | 示例 |
+|------------|------|------|
+| `VPS_HOST` | VPS IP 或域名 | `192.168.1.100` |
+| `VPS_USER` | SSH 用户名 | `devuser` |
+| `VPS_PORT` | SSH 端口 | `22` |
+| `VPS_SSH_KEY` | SSH 私钥 | `-----BEGIN OPENSSH...` |
+| `GHCR_TOKEN` | GitHub PAT (read:packages) | `ghp_xxxx` |
+
+2. **生成 SSH 密钥** (如果没有):
+```bash
+ssh-keygen -t ed25519 -C "github-actions"
+# 将公钥添加到 VPS 的 ~/.ssh/authorized_keys
+# 将私钥内容复制到 VPS_SSH_KEY secret
+```
+
+3. **创建 GitHub PAT**:
+   - GitHub → Settings → Developer settings → Personal access tokens
+   - 权限: `read:packages`
+   - 复制 token 到 `GHCR_TOKEN` secret
+
+4. **VPS 首次配置**:
+```bash
+# 确保 Docker 已安装
+docker --version
+
+# 测试 ghcr.io 登录
+echo YOUR_GHCR_TOKEN | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+```
+
+#### 工作流程
+```
+Push to main → Build Image → Push to ghcr.io → SSH Deploy to VPS
+```
+
+### 方法 2: 本地 CI/CD 脚本
+
+使用提供的脚本手动部署:
+
+```bash
+# 完整流程: 构建 → 推送 → 部署
+./docker-cicd.sh
+
+# 仅推送已构建的镜像
+./docker-push.sh
+
+# 推送并部署
+./docker-push.sh deploy
+```
+
+配置脚本中的 VPS 信息:
+```bash
+VPS_USER="devuser"
+VPS_HOST="your-vps-ip"
+VPS_PORT="22"
+VPS_DEPLOY_PATH="/home/devuser/docker_compose/ukeep"
+```
+
+### 方法 3: 直接在 VPS 上构建
 
 1. 将代码上传到 VPS:
 ```bash
@@ -70,7 +137,7 @@ cd /path/to/ukeep
 docker-compose up -d
 ```
 
-### 方法 2: 本地构建后推送
+### 方法 4: 本地构建后推送到 Registry
 
 1. 本地构建镜像:
 ```bash

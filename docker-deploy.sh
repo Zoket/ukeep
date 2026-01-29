@@ -16,6 +16,7 @@ IMAGE_TAG="latest"
 BASE_IMAGE_NAME="ukeep-base"
 CONTAINER_NAME="ukeep"
 PORT="8080"
+TARGET_PLATFORM="linux/amd64"
 
 # 函数：打印带颜色的消息
 print_info() {
@@ -43,7 +44,7 @@ check_docker() {
 ensure_base_image() {
     if ! docker image inspect ${BASE_IMAGE_NAME}:${IMAGE_TAG} > /dev/null 2>&1; then
         print_warn "Base image not found, building it first..."
-        docker build -f Dockerfile.base -t ${BASE_IMAGE_NAME}:${IMAGE_TAG} .
+        docker build --platform ${TARGET_PLATFORM} -f Dockerfile.base -t ${BASE_IMAGE_NAME}:${IMAGE_TAG} .
         print_info "Base image built successfully"
     else
         print_info "Base image exists: ${BASE_IMAGE_NAME}:${IMAGE_TAG}"
@@ -53,15 +54,15 @@ ensure_base_image() {
 # 函数：构建 base 镜像
 build_base_image() {
     print_info "Building base image: ${BASE_IMAGE_NAME}:${IMAGE_TAG}"
-    docker build -f Dockerfile.base -t ${BASE_IMAGE_NAME}:${IMAGE_TAG} .
+    docker build --platform ${TARGET_PLATFORM} -f Dockerfile.base -t ${BASE_IMAGE_NAME}:${IMAGE_TAG} .
     print_info "Base image built successfully"
 }
 
 # 函数：构建镜像
 build_image() {
     ensure_base_image
-    print_info "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
-    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+    print_info "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG} (platform: ${TARGET_PLATFORM})"
+    docker build --platform ${TARGET_PLATFORM} -t ${IMAGE_NAME}:${IMAGE_TAG} .
     print_info "Build completed successfully"
 }
 
