@@ -26,6 +26,7 @@ pub fn AddItem() -> Element {
     // Form State
     let mut name = use_signal(|| "".to_string());
     let mut production_date_str = use_signal(|| Local::now().format("%Y-%m-%d").to_string());
+    let mut quantity_str = use_signal(|| "1".to_string());
     let mut expiry_date_str = use_signal(|| Local::now().format("%Y-%m-%d").to_string());
 
     // Quick Chips Data
@@ -44,12 +45,19 @@ pub fn AddItem() -> Element {
 
         if let Ok(parsed_date) = NaiveDate::parse_from_str(&expiry_date_str.read(), "%Y-%m-%d") {
             let item_name = name.read().clone();
+            let quantity = quantity_str
+                .read()
+                .parse::<u32>()
+                .ok()
+                .filter(|q| *q >= 1)
+                .unwrap_or(1);
             let emoji = extract_emoji(&item_name);
 
-            inventory.write().push(Item::new(
+            inventory.write().push(Item::new_with_quantity(
                 item_name,
                 emoji,
                 parsed_date,
+                quantity,
             ));
             navigator.go_back();
         }
@@ -123,7 +131,20 @@ pub fn AddItem() -> Element {
                 }
             }
 
-            // 4. Expiry Date
+            // 4. Quantity
+            div { class: "flex flex-col mb-6",
+                label { class: "block text-sm font-medium text-gray-700 mb-2", "数量" }
+                input {
+                    r#type: "number",
+                    min: "1",
+                    step: "1",
+                    class: "w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all",
+                    value: "{quantity_str}",
+                    oninput: move |evt| quantity_str.set(evt.value())
+                }
+            }
+
+            // 5. Expiry Date
             div { class: "flex flex-col mb-8",
                 label { class: "block text-sm font-medium text-gray-700 mb-2", "过期日期" }
                 // Duration Presets
@@ -144,7 +165,7 @@ pub fn AddItem() -> Element {
 
             div { class: "flex-1" } // Push button to bottom
 
-            // 5. Submit
+            // 6. Submit
             button {
                 class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-95 text-lg mt-4",
                 onclick: submit,

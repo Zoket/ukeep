@@ -3,22 +3,39 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+fn default_quantity() -> u32 {
+    1
+}
+
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Item {
     id: Uuid,
     name: String,
     emoji: String,
     expiry_date: NaiveDate,
+    #[serde(default = "default_quantity")]
+    quantity: u32,
 }
 
 impl Item {
     /// 创建新的 Item 实例
     pub fn new(name: String, emoji: String, expiry_date: NaiveDate) -> Self {
+        Self::new_with_quantity(name, emoji, expiry_date, 1)
+    }
+
+    /// 创建带数量的 Item 实例
+    pub fn new_with_quantity(
+        name: String,
+        emoji: String,
+        expiry_date: NaiveDate,
+        quantity: u32,
+    ) -> Self {
         Self {
             id: Uuid::new_v4(),
             name,
             emoji,
             expiry_date,
+            quantity: quantity.max(1),
         }
     }
 
@@ -40,6 +57,21 @@ impl Item {
     /// 获取过期日期
     pub fn expiry_date(&self) -> NaiveDate {
         self.expiry_date
+    }
+
+    /// 获取数量
+    pub fn quantity(&self) -> u32 {
+        self.quantity
+    }
+
+    /// 消耗一个单位，返回是否需要移除整个条目
+    pub fn consume_one(&mut self) -> bool {
+        if self.quantity > 1 {
+            self.quantity -= 1;
+            false
+        } else {
+            true
+        }
     }
 
     /// 计算剩余天数：负数表示已过期

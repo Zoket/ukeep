@@ -125,7 +125,12 @@ pub fn ItemCard(
                 div { class: "flex-1 flex items-center p-4",
                     span { class: "text-3xl mr-4", "{item.emoji()}" }
                     div { class: "flex flex-col gap-0.5",
-                        span { class: "text-lg font-medium text-gray-900", "{item.name()}" }
+                        div { class: "flex items-center gap-2",
+                            span { class: "text-lg font-medium text-gray-900", "{item.name()}" }
+                            span { class: "inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600",
+                                "x{item.quantity()}"
+                            }
+                        }
                         span { class: "text-xs text-gray-500", "{item.expiry_date().format(\"%Y-%m-%d\")}" }
                     }
                 }

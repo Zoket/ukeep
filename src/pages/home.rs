@@ -2,6 +2,7 @@ use crate::components::ItemCard;
 use crate::router::Route;
 use crate::state::InventoryState;
 use crate::storage::{export_data, import_data_from_json};
+use chrono::{Local, Timelike};
 use dioxus::prelude::*;
 use gloo_file::callbacks::{read_as_text, FileReader};
 use gloo_file::File;
@@ -34,7 +35,12 @@ pub fn Home() -> Element {
 
     // Handler: 模拟 "吃掉了"
     let consume_item = move |id: Uuid| {
-        inventory.write().retain(|i| i.id() != id);
+        let mut items = inventory.write();
+        if let Some(index) = items.iter().position(|i| i.id() == id) {
+            if items[index].consume_one() {
+                items.remove(index);
+            }
+        }
     };
 
     // Handler: 模拟 "扔掉了"
@@ -120,12 +126,26 @@ pub fn Home() -> Element {
         }
     };
 
+    let greeting = {
+        let now = Local::now();
+        let (hour, minute) = (now.hour(), now.minute());
+        let total = hour * 60 + minute;
+        match total {
+            360..=479 => "早上好 🌅",
+            480..=659 => "上午好 ☀️",
+            660..=809 => "中午好 🍱",
+            810..=1139 => "下午好 🌤️",
+            1140..=1439 => "晚上好 🌙",
+            _ => "夜深了 🌌",
+        }
+    };
+
     rsx! {
         div { class: "flex flex-col p-4 max-w-2xl mx-auto min-h-screen",
             // --- Header ---
             header { class: "flex justify-between items-start mb-6 pt-2",
                 div {
-                    h1 { class: "text-2xl font-bold text-gray-900", "我的冰箱 🧊" }
+                    h1 { class: "text-2xl font-bold text-gray-900", "{greeting}" }
                     span { class: "text-sm text-gray-500 mt-1 block",
                         if urgent_count > 0 {
                             "⚠️ 有 {urgent_count} 个物品需要尽快处理"
