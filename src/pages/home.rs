@@ -34,10 +34,10 @@ pub fn Home() -> Element {
         .count();
 
     // Handler: 模拟 "吃掉了"
-    let consume_item = move |id: Uuid| {
+    let consume_item = move |(id, count): (Uuid, u32)| {
         let mut items = inventory.write();
         if let Some(index) = items.iter().position(|i| i.id() == id) {
-            if items[index].consume_one() {
+            if items[index].consume_n(count) {
                 items.remove(index);
             }
         }

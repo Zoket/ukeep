@@ -4,20 +4,6 @@ use crate::state::InventoryState;
 use chrono::{Duration, Local, NaiveDate};
 use dioxus::prelude::*;
 
-/// 从物品名称中提取 emoji，如果名称以 emoji 开头则返回该 emoji，否则返回默认值
-fn extract_emoji(name: &str) -> String {
-    // 获取第一个字符
-    if let Some(first_char) = name.chars().next() {
-        // 检查是否是 emoji（简单判断：非 ASCII 字符）
-        // 更准确的判断可以检查 Unicode 范围，但这里简化处理
-        if !first_char.is_ascii() {
-            return first_char.to_string();
-        }
-    }
-    // 默认使用纸箱 emoji
-    "📦".to_string()
-}
-
 #[component]
 pub fn AddItem() -> Element {
     let mut inventory = use_context::<InventoryState>().0;
@@ -51,11 +37,9 @@ pub fn AddItem() -> Element {
                 .ok()
                 .filter(|q| *q >= 1)
                 .unwrap_or(1);
-            let emoji = extract_emoji(&item_name);
 
             inventory.write().push(Item::new_with_quantity(
                 item_name,
-                emoji,
                 parsed_date,
                 quantity,
             ));

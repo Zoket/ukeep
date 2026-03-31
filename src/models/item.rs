@@ -19,17 +19,18 @@ pub struct Item {
 
 impl Item {
     /// 创建新的 Item 实例
-    pub fn new(name: String, emoji: String, expiry_date: NaiveDate) -> Self {
-        Self::new_with_quantity(name, emoji, expiry_date, 1)
+    pub fn new(name: String, expiry_date: NaiveDate) -> Self {
+        Self::new_with_quantity(name, expiry_date, 1)
     }
 
     /// 创建带数量的 Item 实例
     pub fn new_with_quantity(
         name: String,
-        emoji: String,
         expiry_date: NaiveDate,
         quantity: u32,
     ) -> Self {
+        let mut name = name;
+        let emoji: String = Item::extract_emoji(&mut name);
         Self {
             id: Uuid::new_v4(),
             name,
@@ -64,14 +65,18 @@ impl Item {
         self.quantity
     }
 
-    /// 消耗一个单位，返回是否需要移除整个条目
-    pub fn consume_one(&mut self) -> bool {
-        if self.quantity > 1 {
-            self.quantity -= 1;
-            false
-        } else {
+    pub fn consume_n(&mut self, count: u32) -> bool {
+        let count = count.max(1);
+        if count >= self.quantity {
             true
+        } else {
+            self.quantity -= count;
+            false
         }
+    }
+
+    pub fn consume_one(&mut self) -> bool {
+        self.consume_n(1)
     }
 
     /// 计算剩余天数：负数表示已过期
@@ -102,5 +107,21 @@ impl Item {
         } else {
             format!("还剩 {} 天", days)
         }
+    }
+
+    /// 从物品名称中提取 emoji，如果名称以 emoji 开头则返回该 emoji，否则返回默认值
+    pub fn extract_emoji(name: &mut String) -> String {
+        // 获取第一个字符
+        if let Some(first_char) = name.chars().next() {
+            // 检查是否是 emoji（简单判断：非 ASCII 字符）
+            // 更准确的判断可以检查 Unicode 范围，但这里简化处理
+            if !first_char.is_ascii() {
+                let char_str = first_char.to_string();
+                name.drain(..first_char.len_utf8());
+                return char_str;
+            }
+        }
+        // 默认使用纸箱 emoji
+        "📦".to_string()
     }
 }
