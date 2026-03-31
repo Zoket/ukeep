@@ -7,8 +7,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  BASE_IMAGE_NAME: ${{ github.repository }}-base
 
 jobs:
   build-and-push:
@@ -19,10 +17,19 @@ jobs:
 
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
+      image_name: ${{ steps.image_names.outputs.image_name }}
+      base_image_name: ${{ steps.image_names.outputs.base_image_name }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Normalize Image Names
+        id: image_names
+        shell: bash
+        run: |
+          echo "image_name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "base_image_name=${GITHUB_REPOSITORY,,}-base" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -38,7 +45,7 @@ jobs:
         id: meta-base
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.BASE_IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ steps.image_names.outputs.base_image_name }}
           tags: |
             type=raw,value=latest
 
@@ -46,21 +53,21 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.base
+          file: ./docker/Dockerfile.base
           push: true
           tags: ${{ steps.meta-base.outputs.tags }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.image_names.outputs.base_image_name }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.image_names.outputs.base_image_name }}:buildcache,mode=max
 
       - name: Update Dockerfile to use registry base image
         run: |
-          sed -i "s|FROM ukeep-base:latest|FROM ${{ env.REGISTRY }}/${{ env.BASE_IMAGE_NAME }}:latest|g" Dockerfile
+          sed -i "s|FROM ukeep-base:latest|FROM ${{ env.REGISTRY }}/${{ steps.image_names.outputs.base_image_name }}:latest|g" docker/Dockerfile
 
       - name: Extract metadata for main image
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ steps.image_names.outputs.image_name }}
           tags: |
             type=raw,value=latest
             type=sha,prefix=
@@ -69,11 +76,11 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
+          file: ./docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.image_names.outputs.image_name }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.image_names.outputs.image_name }}:buildcache,mode=max
 
   deploy:
     needs: build-and-push
@@ -93,7 +100,7 @@ jobs:
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             echo "Pulling latest image..."
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ needs.build-and-push.outputs.image_name }}:latest
 
             echo "Stopping old container..."
             docker stop ukeep 2>/dev/null || true
@@ -104,7 +111,7 @@ jobs:
               --name ukeep \
               -p 80:80 \
               --restart unless-stopped \
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+              ${{ env.REGISTRY }}/${{ needs.build-and-push.outputs.image_name }}:latest
 
             echo "Verifying deployment..."
             sleep 3

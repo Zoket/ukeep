@@ -26,3 +26,4 @@ node_modules
 
 # Deploy config (contains sensitive VPS info)
 .env.deploy
+docker/.env.deploy

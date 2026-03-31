@@ -4,6 +4,12 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+DOCKER_DIR="${PROJECT_ROOT}/docker"
+MAIN_DOCKERFILE="${DOCKER_DIR}/Dockerfile"
+BASE_DOCKERFILE="${DOCKER_DIR}/Dockerfile.base"
+
 # 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -44,7 +50,7 @@ check_docker() {
 ensure_base_image() {
     if ! docker image inspect ${BASE_IMAGE_NAME}:${IMAGE_TAG} > /dev/null 2>&1; then
         print_warn "Base image not found, building it first..."
-        docker build --platform ${TARGET_PLATFORM} -f Dockerfile.base -t ${BASE_IMAGE_NAME}:${IMAGE_TAG} .
+        docker build --platform ${TARGET_PLATFORM} -f "${BASE_DOCKERFILE}" -t ${BASE_IMAGE_NAME}:${IMAGE_TAG} "${PROJECT_ROOT}"
         print_info "Base image built successfully"
     else
         print_info "Base image exists: ${BASE_IMAGE_NAME}:${IMAGE_TAG}"
@@ -54,7 +60,7 @@ ensure_base_image() {
 # 函数：构建 base 镜像
 build_base_image() {
     print_info "Building base image: ${BASE_IMAGE_NAME}:${IMAGE_TAG}"
-    docker build --platform ${TARGET_PLATFORM} -f Dockerfile.base -t ${BASE_IMAGE_NAME}:${IMAGE_TAG} .
+    docker build --platform ${TARGET_PLATFORM} -f "${BASE_DOCKERFILE}" -t ${BASE_IMAGE_NAME}:${IMAGE_TAG} "${PROJECT_ROOT}"
     print_info "Base image built successfully"
 }
 
@@ -62,7 +68,7 @@ build_base_image() {
 build_image() {
     ensure_base_image
     print_info "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG} (platform: ${TARGET_PLATFORM})"
-    docker build --platform ${TARGET_PLATFORM} -t ${IMAGE_NAME}:${IMAGE_TAG} .
+    docker build --platform ${TARGET_PLATFORM} -f "${MAIN_DOCKERFILE}" -t ${IMAGE_NAME}:${IMAGE_TAG} "${PROJECT_ROOT}"
     print_info "Build completed successfully"
 }
 

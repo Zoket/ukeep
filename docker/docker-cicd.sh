@@ -6,7 +6,13 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+DOCKER_DIR="${PROJECT_ROOT}/docker"
 ENV_FILE="${SCRIPT_DIR}/.env.deploy"
+ENV_TEMPLATE_FILE="${SCRIPT_DIR}/.env.deploy.example"
+LEGACY_ENV_FILE="${PROJECT_ROOT}/.env.deploy"
+MAIN_DOCKERFILE="${DOCKER_DIR}/Dockerfile"
+BASE_DOCKERFILE="${DOCKER_DIR}/Dockerfile.base"
 
 # 颜色输出
 RED='\033[0;31m'
@@ -37,8 +43,19 @@ print_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 print_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
+resolve_env_file() {
+    if [[ -f "${ENV_FILE}" ]]; then
+        return
+    fi
+
+    if [[ -f "${LEGACY_ENV_FILE}" ]]; then
+        ENV_FILE="${LEGACY_ENV_FILE}"
+        print_warn "Using legacy config path: ${ENV_FILE}"
+    fi
+}
+
 build_ssh_opts() {
-    SSH_OPTS="-o ConnectTimeout=10 -o PasswordAuthentication=no -o BatchMode=yes"
+    SSH_OPTS="-o ConnectTimeout=10 -o PasswordAuthentication=no"
     if [[ -n "${VPS_SSH_KEY_PATH}" ]]; then
         if [[ ! -f "${VPS_SSH_KEY_PATH}" ]]; then
             print_error "SSH key not found: ${VPS_SSH_KEY_PATH}"
@@ -49,9 +66,11 @@ build_ssh_opts() {
 }
 
 load_env() {
+    resolve_env_file
+
     if [[ ! -f "${ENV_FILE}" ]]; then
         print_error "Config file not found: ${ENV_FILE}"
-        print_info "Create it from template: cp .env.deploy.example .env.deploy"
+        print_info "Create it from template: cp ${ENV_TEMPLATE_FILE} ${SCRIPT_DIR}/.env.deploy"
         exit 1
     fi
     source "${ENV_FILE}"
@@ -83,14 +102,14 @@ check_ssh() {
 ensure_base_image() {
     if ! docker image inspect ${BASE_IMAGE_NAME}:${IMAGE_TAG} > /dev/null 2>&1; then
         print_warn "Base image not found, building..."
-        docker build --platform ${TARGET_PLATFORM} -f Dockerfile.base -t ${BASE_IMAGE_NAME}:${IMAGE_TAG} .
+        docker build --platform ${TARGET_PLATFORM} -f "${BASE_DOCKERFILE}" -t ${BASE_IMAGE_NAME}:${IMAGE_TAG} "${PROJECT_ROOT}"
     fi
 }
 
 build_image() {
     print_step "Building Docker image (platform: ${TARGET_PLATFORM})..."
     ensure_base_image
-    docker build --platform ${TARGET_PLATFORM} -t ${IMAGE_NAME}:${IMAGE_TAG} .
+    docker build --platform ${TARGET_PLATFORM} -f "${MAIN_DOCKERFILE}" -t ${IMAGE_NAME}:${IMAGE_TAG} "${PROJECT_ROOT}"
     print_info "Build completed"
 }
 
@@ -152,7 +171,7 @@ uKeep 完整CI/CD脚本
     verify      验证部署状态
     help        显示帮助
 
-配置文件: .env.deploy (从 .env.deploy.example 复制)
+配置文件: docker/.env.deploy (模板: docker/.env.deploy.example)
 
 示例:
     $0              # 执行完整流程

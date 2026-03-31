@@ -6,7 +6,10 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 ENV_FILE="${SCRIPT_DIR}/.env.deploy"
+ENV_TEMPLATE_FILE="${SCRIPT_DIR}/.env.deploy.example"
+LEGACY_ENV_FILE="${PROJECT_ROOT}/.env.deploy"
 
 # 颜色输出
 RED='\033[0;31m'
@@ -33,8 +36,19 @@ print_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 print_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
+resolve_env_file() {
+    if [[ -f "${ENV_FILE}" ]]; then
+        return
+    fi
+
+    if [[ -f "${LEGACY_ENV_FILE}" ]]; then
+        ENV_FILE="${LEGACY_ENV_FILE}"
+        print_warn "Using legacy config path: ${ENV_FILE}"
+    fi
+}
+
 build_ssh_opts() {
-    SSH_OPTS="-o ConnectTimeout=10 -o PasswordAuthentication=no -o BatchMode=yes"
+    SSH_OPTS="-o ConnectTimeout=10 -o PasswordAuthentication=no"
     if [[ -n "${VPS_SSH_KEY_PATH}" ]]; then
         if [[ ! -f "${VPS_SSH_KEY_PATH}" ]]; then
             print_error "SSH key not found: ${VPS_SSH_KEY_PATH}"
@@ -45,9 +59,11 @@ build_ssh_opts() {
 }
 
 load_env() {
+    resolve_env_file
+
     if [[ ! -f "${ENV_FILE}" ]]; then
         print_error "Config file not found: ${ENV_FILE}"
-        print_info "Create it from template: cp .env.deploy.example .env.deploy"
+        print_info "Create it from template: cp ${ENV_TEMPLATE_FILE} ${SCRIPT_DIR}/.env.deploy"
         exit 1
     fi
     source "${ENV_FILE}"
@@ -69,7 +85,7 @@ check_docker() {
 
 check_image() {
     if ! docker image inspect ${IMAGE_NAME}:${IMAGE_TAG} > /dev/null 2>&1; then
-        print_error "Image ${IMAGE_NAME}:${IMAGE_TAG} not found. Run './docker-deploy.sh build' first."
+        print_error "Image ${IMAGE_NAME}:${IMAGE_TAG} not found. Run './docker/docker-deploy.sh build' first."
         exit 1
     fi
     print_info "Found image: ${IMAGE_NAME}:${IMAGE_TAG}"
@@ -130,7 +146,7 @@ uKeep Docker 镜像推送脚本
     deploy      推送镜像并部署
     help        显示帮助
 
-配置文件: .env.deploy (从 .env.deploy.example 复制)
+配置文件: docker/.env.deploy (模板: docker/.env.deploy.example)
 
 EOF
 }

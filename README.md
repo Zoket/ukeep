@@ -39,11 +39,10 @@ dx serve --platform desktop
 
 ```bash
 # 一键构建并运行
-./docker-deploy.sh
+./docker/docker-deploy.sh
 
 # 或使用 Docker Compose
-docker-compose up -d
+docker compose -f docker/docker-compose.yml up -d
 ```
 
-详细的 Docker 部署说明请查看 [DOCKER_DEPLOY.md](./DOCKER_DEPLOY.md)。
-
+详细的 Docker 部署说明请查看 [docker/DOCKER_DEPLOY.md](./docker/DOCKER_DEPLOY.md)。

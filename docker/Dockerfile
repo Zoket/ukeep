@@ -1,7 +1,7 @@
 # ============================================
 # Stage 1: Build Tailwind CSS
 # ============================================
-FROM node:20-alpine AS tailwind-builder
+FROM node:20-bookworm-slim AS tailwind-builder
 
 WORKDIR /app
 
@@ -11,8 +11,9 @@ COPY tailwind.config.js ./
 COPY input.css ./
 COPY tailwind.css ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies. Tailwind v4 pulls in lightningcss native bindings,
+# which are more reliable on glibc images than on Alpine's musl variant.
+RUN npm ci --include=optional
 
 # Copy source files needed for Tailwind
 COPY src ./src
@@ -25,7 +26,7 @@ RUN mkdir -p ./assets && \
 # Stage 2: Build Rust/WASM Application
 # ============================================
 # Use pre-built base image with all tools installed
-# Build base image first: docker build -f Dockerfile.base -t ukeep-base:latest .
+# Build base image first: docker build -f docker/Dockerfile.base -t ukeep-base:latest .
 FROM ukeep-base:latest AS rust-builder
 
 WORKDIR /app
@@ -41,9 +42,9 @@ COPY assets ./assets
 COPY --from=tailwind-builder /app/assets/tailwind.css ./assets/tailwind.css
 
 # Build the application
-# 使用 dx build 而不是 dx bundle 以避免 strip 问题
-# dx build 仍然会进行 release 优化，只是不会执行 strip 步骤
-RUN dx bundle --release --platform web
+# 使用 dx build 而不是 dx bundle 以避免 strip/wasm-opt 下载问题
+# dx build 仍然会进行 release 优化，只是不会执行 bundle 阶段的额外可执行写入流程
+RUN dx build --release --platform web
 
 # 可选：如果 wasm-strip 可用，手动优化 WASM 文件
 #RUN find target/dx/ukeep/release/web/public/assets -name "*.wasm" -exec wasm-strip {} \; || echo "wasm-strip not available, skipping optimization"
@@ -54,7 +55,7 @@ RUN dx bundle --release --platform web
 FROM nginx:alpine
 
 # Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built application from rust-builder
 COPY --from=rust-builder /app/target/dx/ukeep/release/web/public /usr/share/nginx/html

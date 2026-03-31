@@ -65,10 +65,10 @@ npx tailwindcss -i ./tailwind.css -o ./assets/tailwind.css --minify
 
 ```bash
 # Local deploy
-./docker-deploy.sh
+./docker/docker-deploy.sh
 
 # Docker Compose
-docker-compose up -d
+docker compose -f docker/docker-compose.yml up -d
 ```
 
 ### Testing
